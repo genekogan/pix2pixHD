@@ -11,14 +11,14 @@ pix2pixhd = RunwayModel()
 
 @pix2pixhd.setup
 def setup():
-    model_name = 'landscapes_1_200'
+    model_name = 'landscapes_1_80'
     global opt
     opt = TestOptions().parse(save=False)
     opt.nThreads = 1
     opt.batchSize = 1
     opt.serial_batches = True
     opt.no_flip = True
-    opt.name = 'berlin_fast'
+    opt.name = model_name
     opt.resize_or_crop = 'none'
     opt.use_features = False
     opt.no_instance = True

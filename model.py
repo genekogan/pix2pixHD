@@ -26,7 +26,7 @@ def setup():
     model = create_model(opt)
     return model
 
-@pix2pixhd.command('convert', inputs={'image': 'image'}, outputs={'converted': 'image'})
+@pix2pixhd.command('convert', inputs={'image': 'image'}, outputs={'output': 'image'})
 def convert(model, inp):
     img = np.array(inp['image'])
     h, w = img.shape[0:2]
@@ -39,7 +39,7 @@ def convert(model, inp):
     torch.cuda.synchronize()
     output = util.tensor2im(output.data[0])
     output = Image.fromarray(output)
-    return dict(converted=output)
+    return dict(output=output)
 
 if __name__ == '__main__':
     pix2pixhd.run()

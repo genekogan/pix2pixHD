@@ -9,10 +9,11 @@ import util.util as util
 
 pix2pixhd = RunwayModel()
 
-@pix2pixhd.setup
+
+@pix2pixhd.setup(options={})
 def setup():
-    model_name = 'landscapes_1_80'
     global opt
+    model_name = 'renais_025_025_ngfndf16'
     opt = TestOptions().parse(save=False)
     opt.nThreads = 1
     opt.batchSize = 1
@@ -23,8 +24,11 @@ def setup():
     opt.use_features = False
     opt.no_instance = True
     opt.label_nc = 0
+    opt.ngf = 16
+    opt.ndf = 16
     model = create_model(opt)
     return model
+
 
 @pix2pixhd.command('convert', inputs={'image': 'image'}, outputs={'output': 'image'})
 def convert(model, inp):
@@ -41,5 +45,9 @@ def convert(model, inp):
     output = Image.fromarray(output)
     return dict(output=output)
 
+
 if __name__ == '__main__':
     pix2pixhd.run()
+
+
+

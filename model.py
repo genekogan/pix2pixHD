@@ -1,36 +1,51 @@
+import os
+import glob
 import numpy as np
 from PIL import Image
 import torch
-from runway import RunwayModel
+import runway
 from options.test_options import TestOptions
 from models.models import create_model
 from data.base_dataset import get_params, get_transform
 import util.util as util
 
-pix2pixhd = RunwayModel()
+
+checkpoints = [c.replace('checkpoints/', '') for c in glob.glob('checkpoints/*')]
 
 
-@pix2pixhd.setup(options={})
-def setup():
+def get_model_args(model_name):
+    file_name = os.path.join(os.path.join('checkpoints/', model_name), 'opt.txt')
+    with open(file_name) as f:
+        content = f.readlines()
+    args_all = [ l.split('\n')[0].split(': ') for l in content[1:-1] ]
+    args = {}
+    for a in args_all:
+        args[a[0]] = a[1]
+    return args
+
+
+@runway.setup(options={"model_name": runway.category(choices=checkpoints, default=checkpoints[0]) })
+def setup(options):
     global opt
-    model_name = 'renais_025_025_ngfndf16'
+    model_name = options['model_name']
     opt = TestOptions().parse(save=False)
+    args = get_model_args(model_name)
     opt.nThreads = 1
     opt.batchSize = 1
     opt.serial_batches = True
     opt.no_flip = True
     opt.name = model_name
-    opt.resize_or_crop = 'none'
-    opt.use_features = False
-    opt.no_instance = True
-    opt.label_nc = 0
-    opt.ngf = 16
-    opt.ndf = 16
+    opt.resize_or_crop = args['resize_or_crop']
+    opt.use_features = eval(args['no_instance'])
+    opt.no_instance = eval(args['no_instance'])
+    opt.label_nc = int(args['label_nc'])
+    opt.ngf = int(args['ngf'])
+    opt.ndf = int(args['ndf'])
     model = create_model(opt)
     return model
 
 
-@pix2pixhd.command('convert', inputs={'image': 'image'}, outputs={'output': 'image'})
+@runway.command('convert', inputs={'image': runway.image}, outputs={'output': runway.image})
 def convert(model, inp):
     img = np.array(inp['image'])
     h, w = img.shape[0:2]
@@ -47,7 +62,5 @@ def convert(model, inp):
 
 
 if __name__ == '__main__':
-    pix2pixhd.run()
-
-
+    runway.run()
 

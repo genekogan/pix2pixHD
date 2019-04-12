@@ -24,10 +24,11 @@ def get_model_args(model_name):
     return args
 
 
-@runway.setup(options={"model_name": runway.category(choices=checkpoints, default=checkpoints[0]) })
+@runway.setup(options={"model_name": runway.category(choices=checkpoints, default=checkpoints[0]), 'which_epoch': runway.number })
 def setup(options):
     global opt
     model_name = options['model_name']
+    which_epoch = options['which_epoch']
     opt = TestOptions().parse(save=False)
     args = get_model_args(model_name)
     opt.nThreads = 1
@@ -41,6 +42,7 @@ def setup(options):
     opt.label_nc = int(args['label_nc'])
     opt.ngf = int(args['ngf'])
     opt.ndf = int(args['ndf'])
+    opt.which_epoch = which_epoch if which_epoch > 0 else opt.which_epoch
     model = create_model(opt)
     return model
 
